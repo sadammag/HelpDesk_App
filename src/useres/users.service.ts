@@ -3,12 +3,14 @@ import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,  
+    private jwtService: JwtService
   ) {}
 
 
@@ -30,10 +32,17 @@ export class UsersService {
 
           const userWithTickets = await this.usersRepository.findOne({
             where: { id: user.id },
-            relations: ['tickets'],
+            //relations: ['tickets'],
           });
-          console.log('Поиск билетов !')
-          return userWithTickets
+
+
+            const token = this.generateToken(userWithTickets!); // генерируем токен
+
+            return {
+            user: userWithTickets,
+            token,
+            };
+
   }
 
 
@@ -43,10 +52,16 @@ export class UsersService {
     return user
   }
 
+  // Функция генерации токена
+private generateToken(user: User): string {
+  const payload = { email: user.email, id: user.id };
+  return this.jwtService.sign(payload); // теперь это просто строка
+}
+
 
 
   // СЕРВИС ТЕСТОВЫЙ
-  // ЛУЧШЕ СДЕЛАТЬ 2 ЗАПРОСА (под USER и пол его TICKETS)
+  // ЛУЧШЕ СДЕЛАТЬ 2 ЗАПРОСА (под USER и под его TICKETS)
   async findById(id: string) {
     return this.usersRepository.findOne({
       where: { id },

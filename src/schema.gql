@@ -29,6 +29,11 @@ type User {
   tickets: [Ticket!]!
 }
 
+type AuthResponse {
+  user: User!
+  token: String!
+}
+
 type Query {
   users: [User!]!
   getTicketById(id: String!): Ticket
@@ -37,7 +42,7 @@ type Query {
 
 type Mutation {
   register(name: String!, email: String!, password: String!): User!
-  login(email: String!, password: String!): User
+  login(email: String!, password: String!): AuthResponse!
   createTicket(title: String!, description: String!, userId: String!): Ticket!
   editTicket(id: String!, title: String, description: String, status: String): Ticket
   removeTicket(id: String!): Boolean!
