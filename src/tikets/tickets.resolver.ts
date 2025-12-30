@@ -28,6 +28,15 @@ export class TicketsResolver {
     return this.ticketsService.updateTicket(id, title, description, status);
   }
 
+  @Query(() => Ticket, { nullable: true })
+  getTicketById(
+    @Args('id') id: string,
+    ){
+    return this.ticketsService.getTicketById(id);
+  }
+
+
+
   @Mutation(() => Boolean)
   removeTicket(@Args('id') id: string) {
     return this.ticketsService.removeTicket(id).then(() => true).catch(() => false);
