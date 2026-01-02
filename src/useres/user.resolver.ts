@@ -7,7 +7,8 @@ import { AuthResponse } from './dto/auth-user.dto';
 export class UsersResolver {
   constructor(private usersService: UsersService) {}
 
-  @Mutation(() => User)
+  // Регистриация
+  @Mutation(() => AuthResponse)
   async register(
     @Args('name') name: string,
     @Args('email') email: string,
@@ -16,24 +17,15 @@ export class UsersResolver {
     return this.usersService.register(name, email, password);
   }
 
-  // @Mutation(() => User, { nullable: true })
-  // async login(
-  //   @Args('email') email: string,
-  //   @Args('password') password: string,
-  // ) {
-  //   return this.usersService.login(email, password);
-  // }
 
+  // Логирование
   @Mutation(() => AuthResponse)
   async login(
-  @Args('email') email: string,
-  @Args('password') password: string,
-) {
-  return this.usersService.login(email, password);
-}
-
-  @Query(() => [User])
-  async users() {
-    return this.usersService.findAll();
+    @Args('email') email: string,
+    @Args('password') password: string,
+  ) { 
+    return this.usersService.login(email, password);
   }
+
+
 }
