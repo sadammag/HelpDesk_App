@@ -2,6 +2,9 @@ import { Resolver, Mutation, Args, Query } from '@nestjs/graphql';
 import { UsersService } from './users.service';
 import { User } from './user.entity';
 import { AuthResponse } from './dto/auth-user.dto';
+import { UseGuards } from '@nestjs/common';
+import { GqlAuthGuard } from 'src/auth/jwt-auth.guards';
+import { CurrentUser } from 'src/auth/current-user.decorator';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -27,5 +30,13 @@ export class UsersResolver {
     return this.usersService.login(email, password);
   }
 
+
+  
+  // Проверка авторизации 
+  @Query(() => User)
+  @UseGuards(GqlAuthGuard) // проверяем токен
+  me(@CurrentUser() user: User) {
+    return user; // возвращаем пользователя, если токен валиден
+  }
 
 }
