@@ -17,9 +17,10 @@ export class TicketsResolver {
     createTicket(
       @Args('title') title: string,
       @Args('description') description: string,
+      @Args('status')  status: TicketStatus,
       @CurrentUser() user: User,
       ) {
-    return this.ticketsService.createTicket(title, description, user);
+    return this.ticketsService.createTicket(title, description, status, user);
   }
 
 

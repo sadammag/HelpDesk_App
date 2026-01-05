@@ -13,8 +13,8 @@ export class TicketsService {
 
 
   // Создание билета
-  async createTicket(title: string, description: string, user: User) {
-    const ticket = this.ticketsRepository.create({ title, description, user });
+  async createTicket(title: string, description: string, status:TicketStatus, user: User ) {
+    const ticket = this.ticketsRepository.create({ title, description, status , user });
     return this.ticketsRepository.save(ticket);
   }
 
@@ -45,8 +45,9 @@ export class TicketsService {
   // Получение всех билетов
   async getTicketsByUser(userId: string) {
     return this.ticketsRepository.find({
-      where: { user: { id: userId } },    // Условие нахождения вcех билтов пользователя
+      where: { user: { id: userId } }, // Условие нахождения вcех билтов пользователя
       relations: ['user'],
+      order: { createdAt: 'DESC' } //  ASC сортировка по дате создания
     });
   }
 
