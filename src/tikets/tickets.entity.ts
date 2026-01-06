@@ -1,6 +1,15 @@
 import { ObjectType, Field, registerEnumType } from '@nestjs/graphql';
 import { User } from 'src/useres/user.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+  JoinColumn,
+} from 'typeorm';
+import { TicketLogGQL } from './Orm-mongoDB/TicketLogGQL';
 
 export enum TicketStatus {
   OPEN = 'OPEN',
@@ -12,7 +21,7 @@ registerEnumType(TicketStatus, {
   name: 'TicketStatus',
 });
 
-@ObjectType() 
+@ObjectType()
 @Entity('tickets')
 export class Ticket {
   @Field()
@@ -28,7 +37,12 @@ export class Ticket {
   description: string;
 
   @Field(() => TicketStatus)
-  @Column({ type: 'enum', enum: TicketStatus, default: TicketStatus.OPEN, name: 'status' })
+  @Column({
+    type: 'enum',
+    enum: TicketStatus,
+    default: TicketStatus.OPEN,
+    name: 'status',
+  })
   status: TicketStatus;
 
   @Field()
@@ -40,7 +54,11 @@ export class Ticket {
   updatedAt: Date;
 
   @Field(() => User)
-  @ManyToOne(() => User, user => user.tickets, { eager: true })
+  @ManyToOne(() => User, (user) => user.tickets, { eager: true })
   @JoinColumn({ name: 'user_id' })
   user: User;
+
+  // Поле для логов из MongoDB
+  @Field(() => [TicketLogGQL], { nullable: true })
+  logs?: TicketLogGQL[];
 }

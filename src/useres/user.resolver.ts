@@ -20,23 +20,19 @@ export class UsersResolver {
     return this.usersService.register(name, email, password);
   }
 
-
   // Логирование
   @Mutation(() => AuthResponse)
   async login(
     @Args('email') email: string,
     @Args('password') password: string,
-  ) { 
+  ) {
     return this.usersService.login(email, password);
   }
 
-
-  
-  // Проверка авторизации 
+  // Проверка авторизации
   @Query(() => User)
   @UseGuards(GqlAuthGuard) // проверяем токен
   me(@CurrentUser() user: User) {
     return user; // возвращаем пользователя, если токен валиден
   }
-
 }

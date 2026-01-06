@@ -2,6 +2,18 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type TicketLogGQL {
+  ticketId: String!
+  authorId: String!
+  message: String!
+  createdAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
 type Ticket {
   id: String!
   title: String!
@@ -10,17 +22,13 @@ type Ticket {
   createdAt: DateTime!
   updatedAt: DateTime!
   user: User!
+  logs: [TicketLogGQL!]
 }
 
 enum TicketStatus {
   OPEN
   CLOSED
 }
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
 
 type User {
   id: String!

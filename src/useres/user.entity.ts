@@ -1,12 +1,12 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { Ticket } from 'src/tikets/tickets.entity';
 import { Field, ObjectType } from '@nestjs/graphql';
+import { Ticket } from 'src/tikets/tickets.entity';
 
 @ObjectType()
 @Entity()
 export class User {
   @Field()
-  @PrimaryGeneratedColumn('uuid')   // UUID вместо числа (большой уникальный идентификатор)
+  @PrimaryGeneratedColumn('uuid') // UUID вместо числа (большой уникальный идентификатор)
   id: string;
 
   @Field()
@@ -21,6 +21,6 @@ export class User {
   password: string;
 
   @Field(() => [Ticket])
-  @OneToMany(() => Ticket, ticket => ticket.user)
+  @OneToMany(() => Ticket, (ticket) => ticket.user)
   tickets: Ticket[];
 }

@@ -5,15 +5,16 @@ import { join } from 'path';
 import { User } from './useres/user.entity';
 import { UsersModule } from './useres/user.module';
 import { TicketsModule } from './tikets/tickets.module';
-import { Ticket } from './tikets/tickets.entity';
 import { ApolloDriver } from '@nestjs/apollo';
-import { ConfigModule } from "@nestjs/config";
-
+import { ConfigModule } from '@nestjs/config';
+import { Ticket } from './tikets/tickets.entity';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({          // - чтобы нест считывал всю конфигурацию
-         envFilePath: `.development.env`   // путь до файла конфигурации
+    ConfigModule.forRoot({
+      // - чтобы нест считывал всю конфигурацию
+      envFilePath: `.development.env`, // путь до файла конфигурации
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -23,10 +24,13 @@ import { ConfigModule } from "@nestjs/config";
       password: process.env.POSTGRESS_PASSWORD,
       database: process.env.POSTGRESS_DB,
       entities: [User, Ticket],
-      synchronize: true,        // Автоматически создание таблица     
+      synchronize: true, // Автоматически создание таблица
     }),
+
+    MongooseModule.forRoot('mongodb://localhost:27017/mytickets'),
+
     GraphQLModule.forRoot({
-      driver: ApolloDriver, 
+      driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: true,
     }),
@@ -35,4 +39,3 @@ import { ConfigModule } from "@nestjs/config";
   ],
 })
 export class AppModule {}
-

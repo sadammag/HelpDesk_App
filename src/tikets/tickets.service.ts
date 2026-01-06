@@ -1,23 +1,54 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Ticket, TicketStatus } from './tickets.entity';
 import { User } from 'src/useres/user.entity';
+import { Ticket, TicketStatus } from './tickets.entity';
+import { TicketLogsService } from './Orm-mongoDB/ticket-logs.service';
+import { Model } from 'mongoose';
+import { TicketLogDocument } from './Orm-mongoDB/ticket-log.schema';
 
 @Injectable()
 export class TicketsService {
   constructor(
     @InjectRepository(Ticket)
     private ticketsRepository: Repository<Ticket>,
+    private readonly ticketLogsService: TicketLogsService,
   ) {}
 
-
   // Создание билета
-  async createTicket(title: string, description: string, status:TicketStatus, user: User ) {
-    const ticket = this.ticketsRepository.create({ title, description, status , user });
-    return this.ticketsRepository.save(ticket);
-  }
+  async createTicket(
+    title: string,
+    description: string,
+    status: TicketStatus,
+    user: User,
+  ) {
+    // Основные поля
+    const ticket = this.ticketsRepository.create({
+      title,
+      description,
+      status,
+      user,
+    });
 
+    // Сохроняем билет в БД
+    const savedTicket = await this.ticketsRepository.save(ticket);
+    await this.ticketLogsService.createLog(
+      savedTicket.id,
+      user.id,
+      'Типа логи',
+    );
+
+    // получаем все логи
+    const logs = await this.ticketLogsService.getLogsByTicket(savedTicket.id);
+    console.log(logs, '- логи');
+
+    // Буду возвращаться готовый собранный объект из после Postgres и Мongo
+    return { ...savedTicket, logs }; // logs - массив объектов из MongoDB
+  }
 
   // Обновления билета
   async updateTicket(
@@ -27,11 +58,15 @@ export class TicketsService {
     description?: string,
     status?: TicketStatus,
   ) {
-
-    const ticket = await this.ticketsRepository.findOne({ where: { id }, relations: ['user'] });
+    const ticket = await this.ticketsRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
     if (!ticket) throw new NotFoundException('Билет не найден');
     if (ticket.user.id !== user.id) {
-      throw new ForbiddenException('Нет доступа к редактированию чужого билета');
+      throw new ForbiddenException(
+        'Нет доступа к редактированию чужого билета',
+      );
     }
 
     if (title !== undefined) ticket.title = title;
@@ -41,16 +76,14 @@ export class TicketsService {
     return this.ticketsRepository.save(ticket);
   }
 
-
-  // Получение всех билетов
+  // Получение всех билетов пользователя
   async getTicketsByUser(userId: string) {
     return this.ticketsRepository.find({
       where: { user: { id: userId } }, // Условие нахождения вcех билтов пользователя
       relations: ['user'],
-      order: { createdAt: 'DESC' } //  ASC сортировка по дате создания
+      order: { createdAt: 'DESC' }, //  ASC сортировка по дате создания
     });
   }
-
 
   // Удаление билета
   async removeTicket(id: string, user: User) {
@@ -59,27 +92,25 @@ export class TicketsService {
       relations: ['user'],
     });
 
-    if (!ticket)  {
-      console.log('Билет не найден !!!')
+    if (!ticket) {
+      console.log('Билет не найден !!!');
       throw new NotFoundException('Билет не найден');
     }
 
     if (ticket.user.id !== user.id) {
-      console.log('Нет доступа к другому билету')
+      console.log('Нет доступа к другому билету');
       throw new ForbiddenException('Нет доступа к удалению чужого билета');
     }
 
     await this.ticketsRepository.delete(id);
     return true;
-}
-
-
+  }
 
   // // Получения 1 конкретного билета
   // async getTicketById(id: string) {
   // return this.ticketsRepository.findOne({
   //   where: { id },
-  //   relations: ['user'], 
+  //   relations: ['user'],
   // });
   // }
 }
