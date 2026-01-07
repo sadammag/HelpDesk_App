@@ -11,7 +11,7 @@ export class TicketLog {
   @Prop({ required: true })
   authorId: string;
 
-  @Prop({ required: true })
+  @Prop({ required: false, default: '' })
   message: string;
 }
 

@@ -24,6 +24,7 @@ export class TicketsService {
     description: string,
     status: TicketStatus,
     user: User,
+    message?: string,
   ) {
     // Основные поля
     const ticket = this.ticketsRepository.create({
@@ -33,12 +34,13 @@ export class TicketsService {
       user,
     });
 
-    // Сохроняем билет в БД
+    // Сохроняем билет в БД (Postgres)
     const savedTicket = await this.ticketsRepository.save(ticket);
+    // Сохроняем логи в БД (MongoDB)
     await this.ticketLogsService.createLog(
       savedTicket.id,
       user.id,
-      'Типа логи',
+      message || '',
     );
 
     // Получаем все логи

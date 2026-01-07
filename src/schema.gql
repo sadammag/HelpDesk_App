@@ -50,7 +50,7 @@ type Query {
 type Mutation {
   register(name: String!, email: String!, password: String!): AuthResponse!
   login(email: String!, password: String!): AuthResponse!
-  createTicket(title: String!, description: String!, status: String!): Ticket!
+  createTicket(title: String!, description: String!, status: String!, message: String!): Ticket!
   editTicket(id: String!, title: String, description: String, status: String): Ticket
   removeTicket(id: String!): Boolean!
 }

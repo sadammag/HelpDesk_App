@@ -29,13 +29,16 @@ export class TicketsResolver {
     @Args('title') title: string,
     @Args('description') description: string,
     @Args('status') status: TicketStatus,
-    @CurrentUser() user: User,
+    @CurrentUser()
+    user: User,
+    @Args('message') message: string,
   ) {
     let ticetResolver = this.ticketsService.createTicket(
       title,
       description,
       status,
       user,
+      message,
     );
 
     return ticetResolver; //this.ticketsService.createTicket(title, description, status, user);
