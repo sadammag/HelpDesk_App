@@ -1,14 +1,26 @@
-import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Args,
+  ResolveField,
+  Parent,
+} from '@nestjs/graphql';
 import { TicketsService } from './tickets.service';
 import { User } from 'src/useres/user.entity';
 import { UseGuards } from '@nestjs/common';
 import { GqlAuthGuard } from 'src/auth/jwt-auth.guards';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { Ticket, TicketStatus } from './tickets.entity';
+import { TicketLogGQL } from './Orm-mongoDB/TicketLogGQL';
+import { TicketLogsService } from './Orm-mongoDB/ticket-logs.service';
 
 @Resolver(() => Ticket)
 export class TicketsResolver {
-  constructor(private ticketsService: TicketsService) {}
+  constructor(
+    private ticketsService: TicketsService,
+    private ticketLogsService: TicketLogsService,
+  ) {}
 
   // Создание билета
   @Mutation(() => Ticket)
@@ -25,7 +37,7 @@ export class TicketsResolver {
       status,
       user,
     );
-    console.log(ticetResolver, 'ticetResolver');
+
     return ticetResolver; //this.ticketsService.createTicket(title, description, status, user);
   }
 
@@ -55,6 +67,12 @@ export class TicketsResolver {
     return this.ticketsService.getTicketsByUser(user.id);
   }
 
+  // GraphQL сам вызовет это ТОЛЬКО если запрошено поле logs
+  @ResolveField(() => [TicketLogGQL])
+  async logs(@Parent() ticket: Ticket) {
+    return this.ticketLogsService.getLogsByTicket(ticket.id);
+  }
+
   // Удаление кокретного билета
   @Mutation(() => Boolean)
   @UseGuards(GqlAuthGuard)
@@ -67,12 +85,12 @@ export class TicketsResolver {
       .then(() => true)
       .catch(() => false);
   }
-
-  // Получение 1 конкретного билета
-  //  @Query(() => Ticket, { nullable: true })
-  //  getTicketById(
-  //  @Args('id') id: string,
-  //  ){
-  //  return this.ticketsService.getTicketById(id);
-  //  }
 }
+
+// Получение 1 конкретного билета
+//  @Query(() => Ticket, { nullable: true })
+//  getTicketById(
+//  @Args('id') id: string,
+//  ){
+//  return this.ticketsService.getTicketById(id);
+//  }

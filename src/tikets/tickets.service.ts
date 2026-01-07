@@ -1,6 +1,7 @@
 import {
   ForbiddenException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -8,8 +9,6 @@ import { Repository } from 'typeorm';
 import { User } from 'src/useres/user.entity';
 import { Ticket, TicketStatus } from './tickets.entity';
 import { TicketLogsService } from './Orm-mongoDB/ticket-logs.service';
-import { Model } from 'mongoose';
-import { TicketLogDocument } from './Orm-mongoDB/ticket-log.schema';
 
 @Injectable()
 export class TicketsService {
@@ -42,11 +41,9 @@ export class TicketsService {
       'Типа логи',
     );
 
-    // получаем все логи
+    // Получаем все логи
     const logs = await this.ticketLogsService.getLogsByTicket(savedTicket.id);
-    console.log(logs, '- логи');
 
-    // Буду возвращаться готовый собранный объект из после Postgres и Мongo
     return { ...savedTicket, logs }; // logs - массив объектов из MongoDB
   }
 
@@ -102,15 +99,20 @@ export class TicketsService {
       throw new ForbiddenException('Нет доступа к удалению чужого билета');
     }
 
-    await this.ticketsRepository.delete(id);
-    return true;
+    try {
+      await this.ticketLogsService.deleteLogsByTicket(id);
+      await this.ticketsRepository.delete(id);
+      return true;
+    } catch (e) {
+      throw new InternalServerErrorException('Ошибка при удалении билета');
+    }
   }
-
-  // // Получения 1 конкретного билета
-  // async getTicketById(id: string) {
-  // return this.ticketsRepository.findOne({
-  //   where: { id },
-  //   relations: ['user'],
-  // });
-  // }
 }
+
+// // Получения 1 конкретного билета
+// async getTicketById(id: string) {
+// return this.ticketsRepository.findOne({
+//   where: { id },
+//   relations: ['user'],
+// });
+// }

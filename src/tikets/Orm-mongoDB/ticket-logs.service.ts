@@ -24,4 +24,9 @@ export class TicketLogsService {
       .sort({ createdAt: 1 }) // сортировка по времени создания
       .exec();
   }
+
+  // Удалить все logs билета
+  async deleteLogsByTicket(ticketId: string): Promise<void> {
+    await this.ticketLogModel.deleteMany({ ticketId });
+  }
 }
