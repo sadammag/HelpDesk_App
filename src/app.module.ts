@@ -24,10 +24,11 @@ import { MongooseModule } from '@nestjs/mongoose';
       password: process.env.POSTGRESS_PASSWORD,
       database: process.env.POSTGRESS_DB,
       entities: [User, Ticket],
+      autoLoadEntities: true,
       synchronize: true, // Автоматически создание таблица
     }),
 
-    MongooseModule.forRoot('mongodb://localhost:27017/mytickets'),
+    MongooseModule.forRoot(process.env.MONGO_URI!),
 
     GraphQLModule.forRoot({
       driver: ApolloDriver,

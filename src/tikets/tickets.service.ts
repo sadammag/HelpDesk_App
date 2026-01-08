@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { User } from 'src/useres/user.entity';
 import { Ticket, TicketStatus } from './tickets.entity';
 import { TicketLogsService } from './Orm-mongoDB/ticket-logs.service';
@@ -84,11 +84,26 @@ export class TicketsService {
   }
 
   // Получение всех билетов пользователя
-  async getTicketsByUser(userId: string) {
+  // async getTicketsByUser(userId: string) {
+  //   return this.ticketsRepository.find({
+  //     where: { user: { id: userId } },
+  //     relations: ['user'],
+  //     order: { createdAt: 'DESC' }, //  ASC сортировка по дате создания
+  //   });
+  // }
+
+  async getTicketsByUser(userId: string, search?: string) {
+    const where = {
+      user: { id: userId },
+      ...(search && search.trim() !== ''
+        ? { title: ILike(`%${search.trim()}%`) }
+        : {}),
+    };
+
     return this.ticketsRepository.find({
-      where: { user: { id: userId } },
+      where,
       relations: ['user'],
-      order: { createdAt: 'DESC' }, //  ASC сортировка по дате создания
+      order: { createdAt: 'DESC' },
     });
   }
 

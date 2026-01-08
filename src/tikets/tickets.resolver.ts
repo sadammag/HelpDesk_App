@@ -65,11 +65,20 @@ export class TicketsResolver {
     );
   }
 
-  // Получение всех билетов текущего пользователя
+  // // Получение всех билетов текущего пользователя
+  // @Query(() => [Ticket])
+  // @UseGuards(GqlAuthGuard)
+  // ticketsByUser(@CurrentUser() user: User) {
+  //   return this.ticketsService.getTicketsByUser(user.id);
+  // }
+
   @Query(() => [Ticket])
   @UseGuards(GqlAuthGuard)
-  ticketsByUser(@CurrentUser() user: User) {
-    return this.ticketsService.getTicketsByUser(user.id);
+  ticketsByUser(
+    @CurrentUser() user: User,
+    @Args('search', { nullable: true }) search?: string,
+  ) {
+    return this.ticketsService.getTicketsByUser(user.id, search);
   }
 
   // GraphQL сам вызовет это ТОЛЬКО если запрошено поле logs
