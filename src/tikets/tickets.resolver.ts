@@ -31,7 +31,7 @@ export class TicketsResolver {
     @Args('status') status: TicketStatus,
     @CurrentUser()
     user: User,
-    @Args('message') message: string,
+    @Args('message', { nullable: true }) message?: string,
   ) {
     let ticetResolver = this.ticketsService.createTicket(
       title,
@@ -41,7 +41,7 @@ export class TicketsResolver {
       message,
     );
 
-    return ticetResolver; //this.ticketsService.createTicket(title, description, status, user);
+    return ticetResolver;
   }
 
   // Редактирование существующего билета
@@ -53,6 +53,7 @@ export class TicketsResolver {
     @Args('title', { nullable: true }) title?: string,
     @Args('description', { nullable: true }) description?: string,
     @Args('status', { nullable: true }) status?: TicketStatus,
+    @Args('message', { nullable: true }) message?: string,
   ) {
     return this.ticketsService.updateTicket(
       user,
@@ -60,6 +61,7 @@ export class TicketsResolver {
       title,
       description,
       status,
+      message,
     );
   }
 
@@ -89,11 +91,3 @@ export class TicketsResolver {
       .catch(() => false);
   }
 }
-
-// Получение 1 конкретного билета
-//  @Query(() => Ticket, { nullable: true })
-//  getTicketById(
-//  @Args('id') id: string,
-//  ){
-//  return this.ticketsService.getTicketById(id);
-//  }

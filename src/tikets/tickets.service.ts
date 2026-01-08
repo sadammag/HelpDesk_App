@@ -15,7 +15,7 @@ export class TicketsService {
   constructor(
     @InjectRepository(Ticket)
     private ticketsRepository: Repository<Ticket>,
-    private readonly ticketLogsService: TicketLogsService,
+    private ticketLogsService: TicketLogsService,
   ) {}
 
   // Создание билета
@@ -56,6 +56,7 @@ export class TicketsService {
     title?: string,
     description?: string,
     status?: TicketStatus,
+    message?: string,
   ) {
     const ticket = await this.ticketsRepository.findOne({
       where: { id },
@@ -72,13 +73,20 @@ export class TicketsService {
     if (description !== undefined) ticket.description = description;
     if (status !== undefined) ticket.status = status;
 
-    return this.ticketsRepository.save(ticket);
+    // Сохраняем изменения в PostgreSQL
+    const updatedTicket = await this.ticketsRepository.save(ticket);
+    // Если есть message, обновляем лог в MongoDB по ticketId
+    if (message) {
+      await this.ticketLogsService.updateLogByTicketId(ticket.id, message);
+    }
+
+    return updatedTicket;
   }
 
   // Получение всех билетов пользователя
   async getTicketsByUser(userId: string) {
     return this.ticketsRepository.find({
-      where: { user: { id: userId } }, // Условие нахождения вcех билтов пользователя
+      where: { user: { id: userId } },
       relations: ['user'],
       order: { createdAt: 'DESC' }, //  ASC сортировка по дате создания
     });
@@ -110,11 +118,3 @@ export class TicketsService {
     }
   }
 }
-
-// // Получения 1 конкретного билета
-// async getTicketById(id: string) {
-// return this.ticketsRepository.findOne({
-//   where: { id },
-//   relations: ['user'],
-// });
-// }

@@ -25,6 +25,17 @@ export class TicketLogsService {
       .exec();
   }
 
+  // Обновить лог по ticketId (если лог один)
+  async updateLogByTicketId(ticketId: string, newMessage: string) {
+    return this.ticketLogModel
+      .updateOne(
+        { ticketId }, // ищем документ по ticketId
+        { message: newMessage }, // переписываем поле message
+        { upsert: true }, // если нет, создаём новый
+      )
+      .exec();
+  }
+
   // Удалить все logs билета
   async deleteLogsByTicket(ticketId: string): Promise<void> {
     await this.ticketLogModel.deleteMany({ ticketId });
