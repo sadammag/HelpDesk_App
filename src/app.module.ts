@@ -9,13 +9,15 @@ import { ApolloDriver } from '@nestjs/apollo';
 import { ConfigModule } from '@nestjs/config';
 import { Ticket } from './tikets/tickets.entity';
 import { MongooseModule } from '@nestjs/mongoose';
+import { CacheModule } from '@nestjs/cache-manager';
+import { RedisConfig } from 'configRedis';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      // - чтобы нест считывал всю конфигурацию
-      envFilePath: `.development.env`, // путь до файла конфигурации
+      envFilePath: `.development.env`,
     }),
+    CacheModule.registerAsync(RedisConfig),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.POSTGRESS_HOST,
@@ -25,7 +27,7 @@ import { MongooseModule } from '@nestjs/mongoose';
       database: process.env.POSTGRESS_DB,
       entities: [User, Ticket],
       autoLoadEntities: true,
-      synchronize: true, // Автоматически создание таблица
+      synchronize: true,
     }),
 
     MongooseModule.forRoot(process.env.MONGO_URI!),
