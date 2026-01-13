@@ -11,6 +11,9 @@ import { Ticket } from './tikets/tickets.entity';
 import { MongooseModule } from '@nestjs/mongoose';
 import { CacheModule } from '@nestjs/cache-manager';
 import { RedisConfig } from 'configRedis';
+import { ScheduleModule } from '@nestjs/schedule';
+import { SqsModule } from './sqs/sqs.module';
+import { CacheCleanerService } from './sqs/cache-cleaner.service';
 
 @Module({
   imports: [
@@ -29,16 +32,19 @@ import { RedisConfig } from 'configRedis';
       autoLoadEntities: true,
       synchronize: true,
     }),
-
     MongooseModule.forRoot(process.env.MONGO_URI!),
-
     GraphQLModule.forRoot({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: true,
     }),
+    ScheduleModule.forRoot(), // 🔹 Для работы @Cron
+    SqsModule,
     UsersModule,
     TicketsModule,
+  ],
+  providers: [
+    CacheCleanerService, // 🔹 вот сюда
   ],
 })
 export class AppModule {}

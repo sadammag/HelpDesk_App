@@ -13,9 +13,9 @@ export const RedisConfig: CacheModuleAsyncOptions = {
     });
 
     // --- Тестовое сохранение в Redis ---
-    await store.client.set('test-2', 'hello my friend', { PX: 3000000 }); // TTL = 30 сек
+    await store.client.set('test-2', 'hello my friend', { PX: 30000000 }); // TTL = 30 сек
     const val = await store.client.get('test-2');
-    console.log('Direct Redis get:', val); // должно вывести "hello"
+    console.log('Direct Redis get:', val);
     // --------------------
 
     return {

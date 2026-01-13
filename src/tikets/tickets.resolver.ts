@@ -65,13 +65,6 @@ export class TicketsResolver {
     );
   }
 
-  // // Получение всех билетов текущего пользователя
-  // @Query(() => [Ticket])
-  // @UseGuards(GqlAuthGuard)
-  // ticketsByUser(@CurrentUser() user: User) {
-  //   return this.ticketsService.getTicketsByUser(user.id);
-  // }
-
   @Query(() => [Ticket])
   @UseGuards(GqlAuthGuard)
   ticketsByUser(
@@ -90,10 +83,7 @@ export class TicketsResolver {
   // Удаление кокретного билета
   @Mutation(() => Boolean)
   @UseGuards(GqlAuthGuard)
-  removeTicket(
-    @Args('id') id: string,
-    @CurrentUser() user: User, // Получаем пользователя из токена
-  ) {
+  removeTicket(@Args('id') id: string, @CurrentUser() user: User) {
     return this.ticketsService
       .removeTicket(id, user)
       .then(() => true)

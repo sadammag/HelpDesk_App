@@ -12,6 +12,7 @@ import { Ticket, TicketStatus } from './tickets.entity';
 import { TicketLogsService } from './Orm-mongoDB/ticket-logs.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
+import { normalizeTicketDates } from 'src/utils/normalize-ticket-dates';
 
 @Injectable()
 export class TicketsService {
@@ -99,19 +100,8 @@ export class TicketsService {
     // Сначала пробуем получить данные из кэша
     const cached = await this.cacheManager.get<any[]>(cacheKey);
 
-    console.log(cached);
     if (cached) {
-      const normalized = cached.map((ticket) => ({
-        ...ticket,
-        createdAt: new Date(ticket.createdAt),
-        updatedAt: new Date(ticket.updatedAt),
-        logs: ticket.logs?.map((log) => ({
-          ...log,
-          createdAt: log.createdAt ? new Date(log.createdAt) : undefined,
-        })),
-      }));
-
-      console.log(' Возвращаем данные из кеша с Date:', normalized);
+      const normalized = normalizeTicketDates(cached);
       return normalized;
     }
 
@@ -129,8 +119,7 @@ export class TicketsService {
       order: { createdAt: 'DESC' },
     });
 
-    // Сохраняем результат в кэш на 30 секунд
-    await this.cacheManager.set(cacheKey, tickets, 300000);
+    await this.cacheManager.set(cacheKey, tickets, 3000000);
 
     return tickets;
   }
@@ -164,14 +153,12 @@ export class TicketsService {
 
   // Обновление кеша в Redis
   private async invalidateUserTicketsCache(userId: string) {
-    // Получаем все ключи пользователя
     const keys: string[] = await this.cacheManager.store.keys(
       `tickets:${userId}:*`,
     );
 
     if (keys.length > 0) {
       await Promise.all(keys.map((key) => this.cacheManager.del(key)));
-      //console.log(`Инвалидация кеша ${userId}:`, keys);
     }
   }
 }
