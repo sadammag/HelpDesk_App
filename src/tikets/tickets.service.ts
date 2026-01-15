@@ -18,8 +18,8 @@ import { normalizeTicketDates } from 'src/utils/normalize-ticket-dates';
 export class TicketsService {
   constructor(
     @InjectRepository(Ticket)
-    private ticketsRepository: Repository<Ticket>,
-    private ticketLogsService: TicketLogsService,
+    private ticketsRepository: Repository<Ticket>, // создания билета и сохранение в базу
+    private ticketLogsService: TicketLogsService, 
     @Inject(CACHE_MANAGER)
     private cacheManager: Cache,
   ) {}
